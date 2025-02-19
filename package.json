@@ -1,0 +1,16 @@
+{
+  "name": "booktracker",
+  "version": "1.0.0",
+  "description": "A book tracking application",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "start": "npx http-server .",
+    "test": "echo 'No test specified'"
+  },
+  "dependencies": {
+    "firebase": "^9.6.10"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
