@@ -69,14 +69,18 @@
             <option value="history">History</option>
             <option value="biography">Biography</option>
           </select>
-          <textarea id="review" placeholder="Review"></textarea>
+          <select id="readStatus" required>
+            <option value="to-read">To Read</option>
+            <option value="reading">Currently Reading</option>
+            <option value="read">Read</option>
+          </select>
+          <textarea id="review" placeholder="Review or Notes"></textarea>
           <input
             type="number"
             id="rating"
             min="1"
             max="5"
             placeholder="Rating (1-5)"
-            required
           />
           <button type="submit">Add Book</button>
         </form>
@@ -93,11 +97,19 @@
             <option value="history">History</option>
             <option value="biography">Biography</option>
           </select>
+          <label for="filter-status">Reading Status:</label>
+          <select id="filter-status">
+            <option value="all">All</option>
+            <option value="to-read">To Read</option>
+            <option value="reading">Currently Reading</option>
+            <option value="read">Read</option>
+          </select>
           <label for="sort-by">Sort by:</label>
           <select id="sort-by">
             <option value="title">Title</option>
             <option value="author">Author</option>
             <option value="rating">Rating</option>
+            <option value="dateAdded">Date Added</option>
           </select>
         </div>
         <ul id="books"></ul>
@@ -140,6 +152,6 @@
     <script src="assets/js/firebase.js"></script>
     <script src="assets/js/authentication.js"></script>
     <script src="assets/js/script.js"></script>
-    <script src="assets/js/chatbot.js"></script>
+    <script type="module" src="assets/js/chatbot.js"></script>
   </body>
 </html>
