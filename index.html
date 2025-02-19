@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BookTracker</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Add Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Add Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="sidebar">
+      <div class="logo">
+        <span class="material-icons">menu_book</span>
+        <h1>BookTracker</h1>
+      </div>
+      <ul class="nav-links">
+        <li class="active">
+          <a href="#"><span class="material-icons">dashboard</span>Dashboard</a>
+        </li>
+        <li>
+          <a href="#add-book"
+            ><span class="material-icons">add_circle</span>Add Book</a
+          >
+        </li>
+        <li>
+          <a href="#book-list"
+            ><span class="material-icons">library_books</span>My Library</a
+          >
+        </li>
+        <li>
+          <a href="#chatbot"
+            ><span class="material-icons">chat</span>AI Assistant</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="search-bar">
+          <span class="material-icons">search</span>
+          <input type="text" placeholder="Search books..." />
+        </div>
+        <div class="user-profile">
+          <button id="auth-button" class="auth-btn">
+            <span class="material-icons">fingerprint</span>
+            Login with Biometrics
+          </button>
+        </div>
+      </header>
+      <section id="add-book">
+        <h2>Add a New Book</h2>
+        <form id="book-form">
+          <input type="text" id="title" placeholder="Title" required />
+          <input type="text" id="author" placeholder="Author" required />
+          <select id="genre">
+            <option value="fiction">Fiction</option>
+            <option value="non-fiction">Non-Fiction</option>
+            <option value="science">Science</option>
+            <option value="history">History</option>
+            <option value="biography">Biography</option>
+          </select>
+          <textarea id="review" placeholder="Review"></textarea>
+          <input
+            type="number"
+            id="rating"
+            min="1"
+            max="5"
+            placeholder="Rating (1-5)"
+            required
+          />
+          <button type="submit">Add Book</button>
+        </form>
+      </section>
+      <section id="book-list">
+        <h2>My Books</h2>
+        <div id="filters">
+          <label for="filter-genre">Filter by Genre:</label>
+          <select id="filter-genre">
+            <option value="all">All</option>
+            <option value="fiction">Fiction</option>
+            <option value="non-fiction">Non-Fiction</option>
+            <option value="science">Science</option>
+            <option value="history">History</option>
+            <option value="biography">Biography</option>
+          </select>
+          <label for="sort-by">Sort by:</label>
+          <select id="sort-by">
+            <option value="title">Title</option>
+            <option value="author">Author</option>
+            <option value="rating">Rating</option>
+          </select>
+        </div>
+        <ul id="books"></ul>
+      </section>
+      <div id="ai-assistant">
+        <button
+          id="chat-toggle"
+          class="chat-toggle-btn"
+          aria-label="Toggle AI Assistant"
+        >
+          <span class="material-icons">smart_toy</span>
+        </button>
+        <div id="chatbot" class="chatbot-container hidden">
+          <div class="chatbot-header">
+            <div class="chatbot-title">
+              <span class="material-icons">psychology</span>
+              <h3>BookBuddy AI</h3>
+            </div>
+            <button class="close-chat" aria-label="Close chat">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+          <div id="messages" class="chat-messages"></div>
+          <div class="chat-input-container">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Ask me about books..."
+              required
+            />
+            <button id="send-message" aria-label="Send message">
+              <span class="material-icons">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+    <script src="assets/js/firebase.js"></script>
+    <script src="assets/js/authentication.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/chatbot.js"></script>
+  </body>
+</html>
