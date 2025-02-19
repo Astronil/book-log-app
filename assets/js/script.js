@@ -1,189 +1,156 @@
-import { database, ref, set, get, child, remove, update } from "./firebase.js";
+import {
+  booksRef,
+  push,
+  onValue,
+  remove,
+  update,
+  ref,
+  db,
+} from "./firebase.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const bookForm = document.getElementById("book-form");
-  const bookList = document.getElementById("books");
+  const booksList = document.getElementById("books");
   const filterGenre = document.getElementById("filter-genre");
+  const filterStatus = document.getElementById("filter-status");
   const sortBy = document.getElementById("sort-by");
+  const searchInput = document.querySelector(".search-bar input");
 
-  bookForm.addEventListener("submit", addBook);
-  filterGenre.addEventListener("change", filterBooks);
-  sortBy.addEventListener("change", sortBooks);
-
-  loadBooks();
-
-  function addBook(e) {
+  // Add book function
+  bookForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const title = document.getElementById("title").value;
-    const author = document.getElementById("author").value;
-    const genre = document.getElementById("genre").value;
-    const review = document.getElementById("review").value;
-    const rating = document.getElementById("rating").value;
 
-    const bookId = Date.now().toString();
-    const bookRef = ref(database, `books/${bookId}`);
-    set(bookRef, {
-      title,
-      author,
-      genre,
-      review,
-      rating: parseInt(rating),
-    })
+    const newBook = {
+      title: document.getElementById("title").value,
+      author: document.getElementById("author").value,
+      genre: document.getElementById("genre").value,
+      readStatus: document.getElementById("readStatus").value,
+      review: document.getElementById("review").value,
+      rating: document.getElementById("rating").value,
+      dateAdded: new Date().toISOString(),
+    };
+
+    // Push to Firebase
+    push(booksRef, newBook)
       .then(() => {
-        alert("Book added successfully!");
         bookForm.reset();
-        loadBooks();
+        alert("Book added successfully!");
       })
       .catch((error) => {
         console.error("Error adding book:", error);
+        alert("Error adding book. Please try again.");
       });
-  }
+  });
 
-  function loadBooks() {
-    const booksRef = ref(database, "books");
-    get(child(booksRef, "/"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const books = snapshot.val();
-          displayBooks(
-            Object.entries(books).map(([id, book]) => ({ ...book, id }))
-          );
-        } else {
-          bookList.innerHTML = "<li>No books found.</li>";
-        }
-      })
-      .catch((error) => {
-        console.error("Error loading books:", error);
-      });
-  }
+  // Load and display books
+  onValue(booksRef, (snapshot) => {
+    const books = snapshot.val();
+    displayBooks(books);
+  });
 
+  // Display books function
   function displayBooks(books) {
-    bookList.innerHTML = "";
-    books.forEach((book) => {
+    booksList.innerHTML = "";
+
+    if (!books) return;
+
+    let filteredBooks = Object.entries(books).map(([id, book]) => ({
+      id,
+      ...book,
+    }));
+
+    // Apply filters
+    const genreFilter = filterGenre.value;
+    const statusFilter = filterStatus.value;
+    const searchTerm = searchInput.value.toLowerCase();
+
+    filteredBooks = filteredBooks.filter((book) => {
+      const matchesGenre = genreFilter === "all" || book.genre === genreFilter;
+      const matchesStatus =
+        statusFilter === "all" || book.readStatus === statusFilter;
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchTerm) ||
+        book.author.toLowerCase().includes(searchTerm);
+      return matchesGenre && matchesStatus && matchesSearch;
+    });
+
+    // Sort books
+    const sortValue = sortBy.value;
+    filteredBooks.sort((a, b) => {
+      if (sortValue === "dateAdded") {
+        return new Date(b.dateAdded) - new Date(a.dateAdded);
+      }
+      return a[sortValue].localeCompare(b[sortValue]);
+    });
+
+    // Create book elements
+    filteredBooks.forEach((book) => {
       const li = document.createElement("li");
+      li.className = `book-item ${book.readStatus}`;
       li.innerHTML = `
                 <h3>${book.title}</h3>
                 <p><strong>Author:</strong> ${book.author}</p>
                 <p><strong>Genre:</strong> ${book.genre}</p>
-                <p><strong>Rating:</strong> ${book.rating} stars</p>
-                <p><strong>Review:</strong> ${book.review}</p>
-                <button class="edit-btn" data-id="${book.id}">Edit</button>
-                <button class="delete-btn" data-id="${book.id}">Delete</button>
+                <p><strong>Status:</strong> ${book.readStatus}</p>
+                ${
+                  book.rating
+                    ? `<p><strong>Rating:</strong> ${"⭐".repeat(
+                        book.rating
+                      )}</p>`
+                    : ""
+                }
+                ${
+                  book.review
+                    ? `<p><strong>Review:</strong> ${book.review}</p>`
+                    : ""
+                }
+                <div class="book-actions">
+                    <button onclick="updateReadStatus('${book.id}')">
+                        <span class="material-icons">auto_stories</span>
+                        Update Status
+                    </button>
+                    <button onclick="deleteBook('${
+                      book.id
+                    }')" class="delete-btn">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
             `;
-      bookList.appendChild(li);
-    });
-
-    const editButtons = document.querySelectorAll(".edit-btn");
-    editButtons.forEach((button) => {
-      button.addEventListener("click", editBook);
-    });
-
-    const deleteButtons = document.querySelectorAll(".delete-btn");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", deleteBook);
+      booksList.appendChild(li);
     });
   }
 
-  function editBook(e) {
-    const bookId = e.target.getAttribute("data-id");
-    const bookRef = ref(database, `books/${bookId}`);
-    get(bookRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const book = snapshot.val();
-          document.getElementById("title").value = book.title;
-          document.getElementById("author").value = book.author;
-          document.getElementById("genre").value = book.genre;
-          document.getElementById("review").value = book.review;
-          document.getElementById("rating").value = book.rating;
+  // Add event listeners for filters
+  filterGenre.addEventListener("change", () => displayBooks(snapshot.val()));
+  filterStatus.addEventListener("change", () => displayBooks(snapshot.val()));
+  sortBy.addEventListener("change", () => displayBooks(snapshot.val()));
+  searchInput.addEventListener("input", () => displayBooks(snapshot.val()));
 
-          bookForm.removeEventListener("submit", addBook);
-          bookForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            update(bookRef, {
-              title: document.getElementById("title").value,
-              author: document.getElementById("author").value,
-              genre: document.getElementById("genre").value,
-              review: document.getElementById("review").value,
-              rating: parseInt(document.getElementById("rating").value),
-            })
-              .then(() => {
-                alert("Book updated successfully!");
-                bookForm.reset();
-                bookForm.addEventListener("submit", addBook);
-                loadBooks();
-              })
-              .catch((error) => {
-                console.error("Error updating book:", error);
-              });
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error getting book:", error);
-      });
-  }
+  // Update read status
+  window.updateReadStatus = async (bookId) => {
+    const bookRef = ref(db, `books/${bookId}`);
+    const statuses = ["to-read", "reading", "read"];
 
-  function deleteBook(e) {
-    const bookId = e.target.getAttribute("data-id");
-    const bookRef = ref(database, `books/${bookId}`);
-    remove(bookRef)
-      .then(() => {
-        alert("Book deleted successfully!");
-        loadBooks();
-      })
-      .catch((error) => {
-        console.error("Error deleting book:", error);
-      });
-  }
+    onValue(
+      bookRef,
+      (snapshot) => {
+        const book = snapshot.val();
+        const currentIndex = statuses.indexOf(book.readStatus);
+        const nextStatus = statuses[(currentIndex + 1) % statuses.length];
 
-  function filterBooks() {
-    const genre = filterGenre.value;
-    const booksRef = ref(database, "books");
-    get(child(booksRef, "/"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          let books = Object.entries(snapshot.val()).map(([id, book]) => ({
-            ...book,
-            id,
-          }));
-          if (genre !== "all") {
-            books = books.filter((book) => book.genre === genre);
-          }
-          displayBooks(books);
-        } else {
-          bookList.innerHTML = "<li>No books found.</li>";
-        }
-      })
-      .catch((error) => {
-        console.error("Error filtering books:", error);
-      });
-  }
+        update(bookRef, {
+          readStatus: nextStatus,
+        });
+      },
+      { onlyOnce: true }
+    );
+  };
 
-  function sortBooks() {
-    const sortByValue = sortBy.value;
-    const booksRef = ref(database, "books");
-    get(child(booksRef, "/"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          let books = Object.entries(snapshot.val()).map(([id, book]) => ({
-            ...book,
-            id,
-          }));
-          if (sortByValue === "title") {
-            books.sort((a, b) => a.title.localeCompare(b.title));
-          } else if (sortByValue === "author") {
-            books.sort((a, b) => a.author.localeCompare(b.author));
-          } else if (sortByValue === "rating") {
-            books.sort((a, b) => b.rating - a.rating);
-          }
-          displayBooks(books);
-        } else {
-          bookList.innerHTML = "<li>No books found.</li>";
-        }
-      })
-      .catch((error) => {
-        console.error("Error sorting books:", error);
-      });
-  }
+  // Delete book
+  window.deleteBook = async (bookId) => {
+    if (confirm("Are you sure you want to delete this book?")) {
+      const bookRef = ref(db, `books/${bookId}`);
+      await remove(bookRef);
+    }
+  };
 });
