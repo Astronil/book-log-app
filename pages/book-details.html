@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Details</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Book Details</h1>
+    </header>
+    <main>
+      <section id="book-details">
+        <h2 id="book-title"></h2>
+        <p><strong>Author:</strong> <span id="book-author"></span></p>
+        <p><strong>Genre:</strong> <span id="book-genre"></span></p>
+        <p><strong>Rating:</strong> <span id="book-rating"></span> stars</p>
+        <p><strong>Review:</strong> <span id="book-review"></span></p>
+        <button id="back-button">Back to List</button>
+      </section>
+    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const backButton = document.getElementById("back-button");
+        backButton.addEventListener("click", () => {
+          window.location.href = "../index.html";
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get("id");
+
+        if (bookId) {
+          fetchBookDetails(bookId);
+        } else {
+          alert("Book ID not found.");
+          window.location.href = "../index.html";
+        }
+
+        function fetchBookDetails(bookId) {
+          const bookRef = firebase.database().ref(`books/${bookId}`);
+          bookRef
+            .once("value", (snapshot) => {
+              if (snapshot.exists()) {
+                const book = snapshot.val();
+                document.getElementById("book-title").textContent = book.title;
+                document.getElementById("book-author").textContent =
+                  book.author;
+                document.getElementById("book-genre").textContent = book.genre;
+                document.getElementById("book-rating").textContent =
+                  book.rating;
+                document.getElementById("book-review").textContent =
+                  book.review;
+              } else {
+                alert("Book not found.");
+                window.location.href = "../index.html";
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching book details:", error);
+              alert("An error occurred while fetching book details.");
+              window.location.href = "../index.html";
+            });
+        }
+      });
+    </script>
+  </body>
+</html>

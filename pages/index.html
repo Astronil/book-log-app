@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Log</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Book Log</h1>
+    </header>
+    <main>
+      <section id="add-book">
+        <h2>Add a New Book</h2>
+        <form id="book-form">
+          <input type="text" id="title" placeholder="Title" required />
+          <input type="text" id="author" placeholder="Author" required />
+          <select id="genre">
+            <option value="fiction">Fiction</option>
+            <option value="non-fiction">Non-Fiction</option>
+            <option value="science">Science</option>
+            <option value="history">History</option>
+            <option value="biography">Biography</option>
+          </select>
+          <textarea id="review" placeholder="Review"></textarea>
+          <input
+            type="number"
+            id="rating"
+            min="1"
+            max="5"
+            placeholder="Rating (1-5)"
+            required
+          />
+          <button type="submit">Add Book</button>
+        </form>
+      </section>
+      <section id="book-list">
+        <h2>My Books</h2>
+        <div id="filters">
+          <label for="filter-genre">Filter by Genre:</label>
+          <select id="filter-genre">
+            <option value="all">All</option>
+            <option value="fiction">Fiction</option>
+            <option value="non-fiction">Non-Fiction</option>
+            <option value="science">Science</option>
+            <option value="history">History</option>
+            <option value="biography">Biography</option>
+          </select>
+          <label for="sort-by">Sort by:</label>
+          <select id="sort-by">
+            <option value="title">Title</option>
+            <option value="author">Author</option>
+            <option value="rating">Rating</option>
+          </select>
+        </div>
+        <ul id="books"></ul>
+      </section>
+      <section id="chatbot">
+        <h2>Chatbot Recommendations</h2>
+        <div id="chatbox">
+          <div id="messages"></div>
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Ask the chatbot for recommendations..."
+            required
+          />
+          <button id="send-message">Send</button>
+        </div>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+    <script src="../assets/js/firebase.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/chatbot.js"></script>
+  </body>
+</html>
